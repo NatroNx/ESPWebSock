@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name = \"viewport\" content = \"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">
+<title>ESP8266</title>
+<style>
+\"body { background-color: #808080; font-family: Arial, Helvetica, Sans-Serif; Color: #000000; }\"
+</style>
+<script>
+var websock;
+function start() {
+websock = new WebSocket('ws://10.0.0.67:81/');
+websock.onopen = function(evt) { console.log('websock open'); };
+websock.onclose = function(evt) { console.log('websock close'); };
+websock.onerror = function(evt) { console.log(evt); };
+websock.onmessage = function(evt) {
+console.log(evt);
+var e = document.getElementById('ledstatus');
+
+if (evt.data === 'Bled|1023\n') {
+e.style.color = 'red';
+
+}
+else if (evt.data === 'Bled|0\n') {
+e.style.color = 'black';
+}
+else if (evt.data.substr(0,1) === 'S') {
+<!--document.getElementById("demo2").innerHTML = evt.data.substr(0,1);
+document.getElementById("sliderAmount").innerHTML = evt.data.substr(1,5);
+document.getElementById("slide1").value=parseInt(evt.data.substr(1,5));
+}
+else {
+
+
+console.log('unknown event');
+}
+};
+}
+function buttonclick(e) {
+websock.send('B' + e.id + '\n');
+}
+
+function updateSlider(slideAmount) {
+document.getElementById("outputTextB").innerHTML=slideAmount;
+websock.send("S" + slideAmount);
+}
+
+
+
+
+</script>
+</head>
+<body onload="javascript:start();">
+<h1>Aquaduino with OTA Updater</h1>
+
+<div id="ledstatus"><b>LED</b></div>
+<button id="led|1023"  type="button" onclick="buttonclick(this);">On</button> 
+<button id="led|0" type="button" onclick="buttonclick(this);">Off</button>
+
+
+
+<br>
+ 	<input type="range" id= "slide1" min="0" max="1023" value="512" step="5" oninput="updateSlider(this.value)" />  B 
+	     <br><br><span id="outputTextB">0</span><p></p>
+<br>
+
+
+ 
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+	
