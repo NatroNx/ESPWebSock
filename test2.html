@@ -10,41 +10,23 @@
 var websock;
 function start() {
 websock = new WebSocket('ws://10.0.0.67:81/');
-websock.onopen = function(evt) { console.log('websock open'); };
-websock.onclose = function(evt) { console.log('websock close'); };
-websock.onerror = function(evt) { console.log(evt); };
-websock.onmessage = function(evt) {
-console.log(evt);
-var e = document.getElementById('ledstatus');
 
-if (evt.data === 'Bled|1023\n') {
-e.style.color = 'red';
-
-}
-else if (evt.data === 'Bled|0\n') {
-e.style.color = 'black';
-}
-else if (evt.data.substr(0,1) === 'S') {
-<!--document.getElementById("demo2").innerHTML = evt.data.substr(0,1);
-document.getElementById("sliderAmount").innerHTML = evt.data.substr(1,5);
-document.getElementById("slide1").value=parseInt(evt.data.substr(1,5));
-}
-else {
 
 
 console.log('unknown event');
 }
 };
 }
-function buttonclick(e) {
-websock.send('B' + e.id + '\n');
-}
 
-function updateSlider(slideAmount) {
-var sliderDiv = document.getElementById("sliderAmount");
-sliderDiv.innerHTML = slideAmount;
-websock.send('S' + slideAmount + '\n');
-}
+
+
+function showValueB(newValue)
+			{
+					connection.send("z"+newValue);
+			}	
+			
+			
+			
 
 
 
@@ -61,9 +43,12 @@ websock.send('S' + slideAmount + '\n');
 
 
 <br>
- <label for="slider1-range">Intensity</label>
- <input name="slide1" id="slide1" type="range"   min="0" max="1023" step="5" value="512" onchange="updateSlider(this.value)" data-highlight="true" />
- <div id="sliderAmount"></div>
+                <div data-role="fieldcontain" id="slider3">
+                    <label for="slider3-range">Blue</label>
+                    <input type="range" id="slider3-range" value="0" min="0" max="1023" onchange="showValueB(this.value)"
+                    step="5" data-highlight="true" />
+                </div>
+				
 <br>
 
 

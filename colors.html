@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    
+    <head>
+        <title>title</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+<script>
+
+var ipValue;
+var connection;
+
+
+
+function mod(){
+var text = document.getElementById('ip').value;
+ipValue = text;	
+connection = new WebSocket(ipValue, ['arduino']); 	
+console.log(text)
+console.log("IP value changed to:"+ipValue);
+connection.onopen = function(evt) { console.log('websock open'); };
+connection.onclose = function(evt) { console.log('websock close'); };
+connection.onerror = function(evt) { console.log(evt); };
+connection.onmessage = function(evt) {
+document.getElementById("slider3-range").value=parseInt(evt.data.substr(1,6));
+}
+
+
+
+
+}	
+
+
+
+
+function showValueB(newValue)
+			{
+					connection.send("z"+newValue);
+					
+			}	
+			
+	function updateSliders(newValue)
+			{
+					connection.send("u"+newValue);
+					
+			}		
+			
+			
+				
+</script>
+      </head>  
+    <body>
+
+        <div data-role="page" id="page1">
+            <div data-role="header">
+                <h1>RGB Slider</h1>
+            </div>
+            <div data-role="content">
+                <div data-role="fieldcontain">
+                    <label for="text1">WebSocket IP</label>
+                    <input type="text" id="ip" value="ws://10.0.0.67:81/" onblur='mod()' />
+                </div>
+					 <script>mod()</script>
+
+                <div data-role="fieldcontain" id="slider3">
+                    <label for="slider3-range">Blue</label>
+                    <input type="range" id="slider3-range" step="5" value="0" min="0" max="1023"  oninput="showValueB(this.value)" onchange="updateSliders(this.value)"
+                      />
+                </div>
+
+				
+
+        </div>
+    </body>
+
+</html>

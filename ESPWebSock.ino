@@ -24,7 +24,7 @@
 #include <WebSocketsServer.h>
 #include <Hash.h>
 #include <ESP8266WebServer.h>
-
+#include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
 
 
@@ -33,6 +33,7 @@
 // Fill in your WiFi router SSID and password
 const char* ssid = "Wlan07";
 const char* password = "wlan_01!_2005!grojer_..";
+MDNSResponder mdns;
 
 ESP8266WiFiMulti WiFiMulti;
 
@@ -42,6 +43,48 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 
 
+const char INDEX_HTML[] =
+  "<!DOCTYPE html>"
+  "<html>"
+  "<head>"
+  "<meta name = \"viewport\" content = \"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
+  "<title>ESP8266 WebSocket Demo</title>"
+  "<style>"
+  "\"body { background-color: #808080; font-family: Arial, Helvetica, Sans-Serif; Color: #000000; }\""
+  "</style>"
+  "<script>"
+  "var websock;"
+  "function start() {"
+  "websock = new WebSocket('ws://10.0.0.67:81/');"
+  "websock.onopen = function(evt) { console.log('websock open'); };"
+  "websock.onclose = function(evt) { console.log('websock close'); };"
+  "websock.onerror = function(evt) { console.log(evt); };"
+  "websock.onmessage = function(evt) {"
+  "console.log(evt);"
+  "var e = document.getElementById('ledstatus');"
+"if (evt.data === 'Bled|1023\\n') {"
+"e.style.color = 'red';"
+"}"
+"else if (evt.data === 'Bled|0\n') {"
+"e.style.color = 'black';"
+"}"
+  "else {"
+  "console.log('unknown event');"
+  "}"
+  "};"
+  "}"
+"function buttonclick(e) {"
+"websock.send('B' + e.id + '\n');"
+  "}"
+  "</script>"
+  "</head>"
+  "<body onload=\"javascript:start();\">"
+  "<h1>Aquaduino with OTA Updater</h1>"
+"<div id=\"ledstatus\"><b>LED</b></div>"
+"<button id=\"led|1023\"  type=\"button\" onclick=\"buttonclick(this);\">On</button> "
+"<button id=\"led|0\" type=\"button\" onclick=\"buttonclick(this);\">Off</button>"
+  "</body>"
+  "</html>";
 
 // GPIO#0 is for Adafruit ESP8266 HUZZAH board. Your board LED might be on 13.
 const int LEDPIN = 13;
@@ -126,8 +169,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 
 void handleRoot()
 {
-  httpServer.send(200, "text/html", "<html><head><script>var connection = new WebSocket('ws://'+location.hostname+':81/', ['arduino']);connection.onopen = function () {  connection.send('Connect ' + new Date()); }; connection.onerror = function (error) {    console.log('WebSocket Error ', error);};connection.onmessage = function (e) {  console.log('Server: ', e.data);};function sendRGB() {  var r = parseInt(document.getElementById('r').value).toString(16);  var g = parseInt(document.getElementById('g').value).toString(16);  var b = parseInt(document.getElementById('b').value).toString(16);  if(r.length < 2) { r = '0' + r; }   if(g.length < 2) { g = '0' + g; }   if(b.length < 2) { b = '0' + b; }   var rgb = '#'+r+g+b;    console.log('RGB: ' + rgb); connection.send(rgb); }</script></head><body>LED Control:<br/><br/>R: <input id=\"r\" type=\"range\" min=\"0\" max=\"255\" step=\"1\" onchange=\"sendRGB();\" /><br/>G: <input id=\"g\" type=\"range\" min=\"0\" max=\"255\" step=\"1\" onchange=\"sendRGB();\" /><br/>B: <input id=\"b\" type=\"range\" min=\"0\" max=\"255\" step=\"1\" onchange=\"sendRGB();\" /><br/></body></html>");
-    });
+  httpServer.send(200, "text/html", INDEX_HTML);
 }
 
 void handleNotFound()
@@ -214,5 +256,5 @@ void loop()
 {
   webSocket.loop();
   httpServer.handleClient();
-
+  delay(1);
 }
